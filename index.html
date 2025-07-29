@@ -26,10 +26,18 @@
             return d;
         }
 
+
+        const colourMap = new Map();
+        colourMap.set('setosa','red');
+        colourMap.set('versicolor','blue');
+        colourMap.set('virginica','green');
+
         // Pulling out the data points to be used as the cx, cy, and radius
         const xValue = (d) => d.petal_length;
         const yValue = (d) => d.sepal_length;
         const radius = 5;
+        const fill = (d) => colourMap.get(d.species);
+
 
         // Set up the size for the svg
         const margin = {top: 20, right: 20, bottom: 40, left: 40};
@@ -47,6 +55,8 @@
         const main = async () => {
             const data = await csv(csvUrl, parseRow);
 
+            // console.log([...new Set( data.map(d => d.species))])
+
             const x = scaleLinear()
                 .domain(extent(data, xValue))
                 .range([margin.left, width-margin.right])
@@ -59,8 +69,13 @@
 
             const marks = data.map(d => ({
                 x: x(xValue(d)),
-                y: y(yValue(d))
+                y: y(yValue(d)),
+                p_x: xValue(d),
+                p_y: yValue(d),
+                fill: colourMap.get(d.species)
             }));
+
+            console.log(marks);
 
             svg
                 .selectAll('circle')
@@ -69,6 +84,9 @@
                 .attr('cx', (d) => d.x)
                 .attr('cy', (d) => d.y)
                 .attr('r', radius)
+                .attr('fill', (d) => d.fill)
+                .append('title')
+                .text(d => (`(${d.p_x}, ${d.p_y})`))
             ;
 
             svg
