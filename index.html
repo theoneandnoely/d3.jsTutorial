@@ -55,11 +55,9 @@
         const main = async () => {
             const data = await csv(csvUrl, parseRow);
 
-            // console.log([...new Set( data.map(d => d.species))])
-
             const x = scaleLinear()
                 .domain(extent(data, xValue))
-                .range([margin.left, width-margin.right])
+                .range([margin.left, width - margin.right])
             ;
 
             const y = scaleLinear()
@@ -70,12 +68,10 @@
             const marks = data.map(d => ({
                 x: x(xValue(d)),
                 y: y(yValue(d)),
-                p_x: xValue(d),
-                p_y: yValue(d),
+                title: `Species: ${d.species.charAt(0).toUpperCase() + d.species.slice(1)}\nPetal Length: ${xValue(d)} cm\nSepal Length: ${yValue(d)} cm`,
                 fill: colourMap.get(d.species)
             }));
 
-            console.log(marks);
 
             svg
                 .selectAll('circle')
@@ -86,7 +82,7 @@
                 .attr('r', radius)
                 .attr('fill', (d) => d.fill)
                 .append('title')
-                .text(d => (`(${d.p_x}, ${d.p_y})`))
+                .text(d => (d.title))
             ;
 
             svg
