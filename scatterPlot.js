@@ -1,5 +1,5 @@
 const {
-    select,
+    scalePoint,
     scaleLinear, 
     extent, 
     axisLeft, 
@@ -16,16 +16,24 @@ export const scatterPlot = () => {
     let margin;
     let radius;
     let colourMap;
+    let xType;
+    let yType;
 
     const my = (selection) => {
-        const x = scaleLinear()
-            .domain(extent(data, xValue))
-            .range([margin.left, width - margin.right])
+        const x = (xType === 'categorical' 
+            ? scalePoint()
+                .domain(data.map(xValue)).padding(0.2)
+            : scaleLinear()
+                .domain(extent(data, xValue))
+            ).range([margin.left, width - margin.right])
         ;
 
-        const y = scaleLinear()
-            .domain(extent(data, yValue))
-            .range([height - margin.bottom, margin.top])
+        const y = (yType === 'categorical'
+            ? scalePoint()
+                .domain(data.map(yValue)).padding(0.2)
+            : scaleLinear()
+                .domain(extent(data, yValue))
+            ).range([height - margin.bottom, margin.top])
         ;
 
         const marks = data.map(d => ({
@@ -57,7 +65,7 @@ export const scatterPlot = () => {
                             .transition(t)
                             .attr('cx',(d) => d.x)
                             .attr('cy', (d) => d.y)
-                            // .delay((d,i) => i * 2)
+                            .delay((d,i) => i)
                         ),
                 (exit) => exit.remove()
                 )
@@ -115,6 +123,14 @@ export const scatterPlot = () => {
 
     my.colourMap = function (_) {
         return arguments.length ? ((colourMap = _), my) : colourMap;
+    }
+
+    my.xType = function (_) {
+        return arguments.length ? ((xType = _), my) : xType;
+    }
+
+    my.yType = function (_) {
+        return arguments.length ? ((yType = _), my) : yType;
     }
 
     return my;

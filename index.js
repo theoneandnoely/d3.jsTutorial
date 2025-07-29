@@ -30,7 +30,7 @@ const radius = 5;
 
 
 // Set up the size for the svg
-const margin = {top: 20, right: 20, bottom: 40, left: 40};
+const margin = {top: 20, right: 20, bottom: 40, left: 100};
 const width = window.innerWidth;
 const height = window.innerHeight;
 
@@ -62,19 +62,33 @@ const main = async () => {
         .colourMap(colourMap)
     ;
     const options = [
-        { value: 'petal_length', label: 'Petal Length' },
-        { value: 'petal_width', label: 'Petal Width' },
-        { value: 'sepal_length', label: 'Sepal Length' },
-        { value: 'sepal_width', label: 'Sepal Width' }
+        { value: 'petal_length', label: 'Petal Length', type: 'quantitative' },
+        { value: 'petal_width', label: 'Petal Width', type: 'quantitative' },
+        { value: 'sepal_length', label: 'Sepal Length', type: 'quantitative' },
+        { value: 'sepal_width', label: 'Sepal Width', type: 'quantitative' },
+        { value: 'species', label: 'Species', type: 'categorical' }
     ]
     svg.call(plot);
+
+    const columnToType = new Map(options.map((option) => [option.value, option.type]));
+
+    const getType = (value) => {
+        return columnToType.get(value);
+    };
+    
+
     xMenu.call(
         menu()
             .id('x-menu')
             .labelText('X:')
             .options(options)
             .on('change', value => {
-                svg.call(plot.xValue(d => d[value]));
+                console.log(getType(value));
+                svg.call(
+                    plot
+                        .xValue(d => d[value])
+                        .xType(getType(value))
+                );
             })
     );
     yMenu.call(
@@ -83,7 +97,11 @@ const main = async () => {
             .labelText('Y:')
             .options(options)
             .on('change', value => {
-                svg.call(plot.yValue(d => d[value]));
+                svg.call(
+                    plot
+                        .yValue(d => d[value])
+                        .yType(getType(value))
+                );
             })
     );
 }
