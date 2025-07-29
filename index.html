@@ -1,9 +1,90 @@
 <!DOCTYPE html>
 <head>
-    <title>D3.js Testing Page</title>
+    <title>Scatter Plot</title>
     <link rel="stylesheet" href="style.css"/>
     <script src="https://unpkg.com/d3@7.9.0/dist/d3.min.js"></script>
-    <script src="./index.js" type="module"></script>
+    <!-- <script src="./index.js" type="module"></script> -->
 </head>
 <body>
+    <script>
+        // Imports
+        const { csv, select, scaleLinear, extent, axisLeft, axisBottom } = d3;
+        
+        // import and clean data
+        const csvUrl = [
+            'https://gist.githubusercontent.com/',
+            'curran/', // User
+            'a08a1080b88344b0c8a7/', // ID of the GIST
+            'raw/0e7a9b0a5d22642a06d3d5b9bcbad9890c8ee534/', // Commit
+            'iris.csv' // File name
+        ].join('');
+        const parseRow = (d) => {
+            d.sepal_length = +d.sepal_length;
+            d.sepal_width = +d.sepal_width;
+            d.petal_length = +d.petal_length;
+            d.petal_width = +d.petal_width;
+            return d;
+        }
+
+        // Pulling out the data points to be used as the cx, cy, and radius
+        const xValue = (d) => d.petal_length;
+        const yValue = (d) => d.sepal_length;
+        const radius = 5;
+
+        // Set up the size for the svg
+        const margin = {top: 20, right: 20, bottom: 40, left: 40};
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+
+        // Set up the base SVG for the plot
+        const svg = select('body')
+            .append('svg')
+            .attr('width', width)
+            .attr('height', height)
+        ;
+
+        // Render the scatter plot
+        const main = async () => {
+            const data = await csv(csvUrl, parseRow);
+
+            const x = scaleLinear()
+                .domain(extent(data, xValue))
+                .range([margin.left, width-margin.right])
+            ;
+
+            const y = scaleLinear()
+                .domain(extent(data, yValue))
+                .range([height - margin.bottom, margin.top])
+            ;
+
+            const marks = data.map(d => ({
+                x: x(xValue(d)),
+                y: y(yValue(d))
+            }));
+
+            svg
+                .selectAll('circle')
+                .data(marks)
+                .join('circle')
+                .attr('cx', (d) => d.x)
+                .attr('cy', (d) => d.y)
+                .attr('r', radius)
+            ;
+
+            svg
+                .append('g')
+                .attr('transform',`translate(${margin.left}, 0)`)
+                .call(axisLeft(y))
+            ;
+
+            svg
+                .append('g')
+                .attr('transform',`translate(0,${height - margin.bottom})`)
+                .call(axisBottom(x))
+            ;
+        }
+
+        // Call the Main function
+        main();
+    </script>
 </body>
