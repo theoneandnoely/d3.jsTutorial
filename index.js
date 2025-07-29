@@ -42,19 +42,32 @@ const svg = select('body')
 
 // Render the scatter plot
 const main = async () => {
-    svg.call(
-            scatterPlot()
-                .width(width)
-                .height(height)
-                .data(await csv(csvUrl, parseRow))
-                .xValue((d) => d.petal_length)
-                .yValue((d) => d.sepal_length)
-                .margin(margin)
-                .radius(radius)
-                .colourMap(colourMap)
+    const plot = scatterPlot()
+        .width(width)
+        .height(height)
+        .data(await csv(csvUrl, parseRow))
+        .xValue((d) => d.petal_length)
+        .yValue((d) => d.sepal_length)
+        .margin(margin)
+        .radius(radius)
+        .colourMap(colourMap)
+    ;
+    const columns = [
+        'petal_length',
+        'petal_width',
+        'sepal_length',
+        'sepal_width'
+    ]
+    let i = 0;
+    setInterval(
+        () => {
+            const column = columns[i%4];
+            plot.xValue((d) => d[column]);
+            svg.call(plot);
+            i++;
+        },
+        1000
     );
-
-    
 }
 
 // Call the Main function

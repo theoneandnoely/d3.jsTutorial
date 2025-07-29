@@ -2,7 +2,8 @@ const {
     scaleLinear, 
     extent, 
     axisLeft, 
-    axisBottom 
+    axisBottom,
+    transition
 } = d3;
 
 export const scatterPlot = () => {
@@ -33,27 +34,49 @@ export const scatterPlot = () => {
             fill: colourMap.get(d.species)
         }));
 
+        const t = transition()
+            .duration(250)
+        ;
 
         selection
             .selectAll('circle')
             .data(marks)
-            .join('circle')
-            .attr('cx', (d) => d.x)
-            .attr('cy', (d) => d.y)
-            .attr('r', radius)
-            .attr('fill', (d) => d.fill)
-            .append('title')
-            .text(d => (d.title))
+            .join(
+                (enter) => enter
+                    .append('circle')
+                        .attr('cx', (d) => d.x)
+                        .attr('cy', (d) => d.y)
+                        .attr('r',0)
+                        .attr('fill', (d) => d.fill)
+                    .call((enter) => 
+                        enter.transition(t).attr('r',radius)),
+                (update) => update
+                    .call((update) => 
+                        update
+                            .transition(t)
+                            .attr('cx',(d) => d.x)
+                            .attr('cy', (d) => d.y)
+                            // .delay((d,i) => i * 2)
+                        ),
+                (exit) => exit.remove()
+                )
         ;
 
         selection
-            .append('g')
+            .selectAll('g.yAxis')
+            .data([null])
+            .join('g')
+            .attr('class','yAxis')
             .attr('transform',`translate(${margin.left}, 0)`)
             .call(axisLeft(y))
         ;
 
         selection
-            .append('g')
+            .selectAll('g.xAxis')
+            .data([null])
+            .join('g')
+            .transition(t)
+            .attr('class','xAxis')
             .attr('transform',`translate(0,${height - margin.bottom})`)
             .call(axisBottom(x))
         ;
