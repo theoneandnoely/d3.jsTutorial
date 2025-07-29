@@ -1,4 +1,5 @@
 const {
+    select,
     scaleLinear, 
     extent, 
     axisLeft, 
@@ -66,6 +67,7 @@ export const scatterPlot = () => {
             .selectAll('g.yAxis')
             .data([null])
             .join('g')
+            .transition(t)
             .attr('class','yAxis')
             .attr('transform',`translate(${margin.left}, 0)`)
             .call(axisLeft(y))

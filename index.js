@@ -1,6 +1,7 @@
 // Imports
-const { csv, select } = d3;
+const { csv, select, on } = d3;
 import { scatterPlot } from "./scatterPlot.js";
+import { menu } from "./menu.js";
 
 // import and clean data
 const csvUrl = [
@@ -40,6 +41,14 @@ const svg = select('body')
     .attr('height', height)
 ;
 
+const menuContainer = select('body')
+    .append('div')
+    .attr('class','menu-container')
+;
+
+const xMenu = menuContainer.append('div');
+const yMenu = menuContainer.append('div');
+
 // Render the scatter plot
 const main = async () => {
     const plot = scatterPlot()
@@ -47,26 +56,35 @@ const main = async () => {
         .height(height)
         .data(await csv(csvUrl, parseRow))
         .xValue((d) => d.petal_length)
-        .yValue((d) => d.sepal_length)
+        .yValue((d) => d.petal_length)
         .margin(margin)
         .radius(radius)
         .colourMap(colourMap)
     ;
-    const columns = [
-        'petal_length',
-        'petal_width',
-        'sepal_length',
-        'sepal_width'
+    const options = [
+        { value: 'petal_length', label: 'Petal Length' },
+        { value: 'petal_width', label: 'Petal Width' },
+        { value: 'sepal_length', label: 'Sepal Length' },
+        { value: 'sepal_width', label: 'Sepal Width' }
     ]
-    let i = 0;
-    setInterval(
-        () => {
-            const column = columns[i%4];
-            plot.xValue((d) => d[column]);
-            svg.call(plot);
-            i++;
-        },
-        1000
+    svg.call(plot);
+    xMenu.call(
+        menu()
+            .id('x-menu')
+            .labelText('X:')
+            .options(options)
+            .on('change', value => {
+                svg.call(plot.xValue(d => d[value]));
+            })
+    );
+    yMenu.call(
+        menu()
+            .id('y-menu')
+            .labelText('Y:')
+            .options(options)
+            .on('change', value => {
+                svg.call(plot.yValue(d => d[value]));
+            })
     );
 }
 
